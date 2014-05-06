@@ -20,6 +20,8 @@ module OmniAuth
       info do
         {
           :name => raw_info['name'],
+          :username => raw_info['name'],
+          :email => user_info(uid)['emailAddress'],
           :self => raw_info['self']
         }
       end
@@ -28,6 +30,12 @@ module OmniAuth
         {
           'raw_info' => raw_info
         }
+      end
+
+      def user_info(username)
+        @user_info ||= MultiJson.decode(access_token.get("/rest/api/2.0.alpha1/user?username=#{username}").body)
+      rescue ::Errno::ETIMEDOUT
+        raise ::Timeout::Error
       end
 
       def raw_info
